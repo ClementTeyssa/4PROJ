@@ -1,0 +1,32 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: website
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`web.`)
+    kind: Rule
+    services:
+    - name: website
+      port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: websitetls
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`web.`)
+    kind: Rule
+    services:
+    - name: website
+      port: 8080
+  tls:
+    certResolver: myresolver

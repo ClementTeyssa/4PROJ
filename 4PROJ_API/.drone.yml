@@ -1,0 +1,33 @@
+kind: pipeline
+name: default
+
+steps:
+- name: dependencies-and-build
+  image: golang:alpine
+  commands:
+  - "apk update && apk add git"
+  - "go get github.com/globalsign/mgo/bson"
+  - "go get github.com/go-bongo/bongo"
+  - "go get github.com/gorilla/mux"
+  - "go build -o ./myapp"
+
+- name: publish
+  image: plugins/docker
+  settings:
+    repo: 
+    tags: [ "${DRONE_COMMIT_SHA:0:7}","latest" ]
+    username: musty01
+    password: 
+      from_secret: hubdocker-password
+    
+- name: deliver
+  image: sinlead/drone-kubectl
+  settings:
+    kubernetes_server: https://
+    kubernetes_cert:  
+      from_secret: kubernetes-cert
+    kubernetes_token: 
+      from_secret: kubernetes-token
+  commands:
+    - kubectl --insecure-skip-tls-verify apply -f deployment/
+    - kubectl set image deployment/api api=:${DRONE_COMMIT_SHA:0:7}

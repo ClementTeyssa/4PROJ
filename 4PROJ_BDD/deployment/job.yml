@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bdd-init
+spec:
+  template:
+    spec:
+      containers:
+      - name: bdd-init
+        image: "musty01/4pjt-bdd"
+      restartPolicy: Never
+  backoffLimit: 1

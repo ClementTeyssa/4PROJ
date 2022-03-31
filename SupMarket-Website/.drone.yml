@@ -1,0 +1,29 @@
+kind: pipeline
+name: default
+
+steps:
+- name: build
+  image: golang:alpine
+  commands:
+  - "go build -o ./myapp"
+
+- name: publish
+  image: plugins/docker
+  settings:
+    repo: /4pjt-website
+    tags: [ "${DRONE_COMMIT_SHA:0:7}","latest" ]
+    username: 
+    password: 
+      from_secret: hubdocker-password
+    
+- name: deliver
+  image: sinlead/drone-kubectl
+  settings:
+    kubernetes_server: https://
+    kubernetes_cert:  
+      from_secret: kubernetes-cert
+    kubernetes_token: 
+      from_secret: kubernetes-token
+  commands:
+    - kubectl --insecure-skip-tls-verify apply -f deployment/
+    - kubectl set image deployment/website website=/4pjt-website:${DRONE_COMMIT_SHA:0:7}

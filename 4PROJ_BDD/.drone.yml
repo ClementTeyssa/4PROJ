@@ -1,0 +1,34 @@
+kind: pipeline
+name: default
+
+steps:
+- name: publish
+  image: plugins/docker
+  settings:
+    repo: musty01/4pjt-bdd
+    tags: [ "${DRONE_COMMIT_SHA:0:7}","latest" ]
+    username: musty01
+    password: 
+      from_secret: hubdocker-password
+    
+- name: launch-job
+  image: sinlead/drone-kubectl
+  settings:
+    kubernetes_server: https://
+    kubernetes_cert:  
+      from_secret: kubernetes-certs
+    kubernetes_token: 
+      from_secret: kubernetes-token
+  commands:
+    - kubectl --insecure-skip-tls-verify apply -f deployment/
+
+- name: delete-job
+  image: sinlead/drone-kubectl
+  settings:
+    kubernetes_server: https://
+    kubernetes_cert:  
+      from_secret: kubernetes-cert
+    kubernetes_token: 
+      from_secret: kubernetes-token
+  commands:
+    - kubectl --insecure-skip-tls-verify delete -f deployment/

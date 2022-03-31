@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: website
+
+spec:
+  ports:
+    - protocol: TCP
+      name: web
+      port: 8080
+  selector:
+    app: website
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: website
+  labels:
+    app: website
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: website
+  template:
+    metadata:
+      labels:
+        app: website
+    spec:
+      containers:
+        - name: website
+          image: "/4pjt-website"
+          ports:
+            - name: web
+              containerPort: 8080

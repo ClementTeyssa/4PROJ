@@ -1,0 +1,12 @@
+kind: pipeline
+name: default
+
+steps:
+- name: deliver
+  image: sinlead/drone-kubectl
+  settings:
+    kubernetes_server: 
+    kubernetes_cert:  
+    kubernetes_token:
+  commands:
+    - kubectl --insecure-skip-tls-verify apply -f deployment/
